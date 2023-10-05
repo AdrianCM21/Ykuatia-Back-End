@@ -1,0 +1,11 @@
+.env
+node_modules
+package-lock.json
+cert.p12
+src/storage/kude/*
+src/storage/xml/*
+src/storage/DTE/*
+*src/services/DE/*
+package-lock.json
+.DS_Store
+*.DS_Store
