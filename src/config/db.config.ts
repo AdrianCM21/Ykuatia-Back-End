@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm"
 import { usuarios } from "../models/db-models/usuarios"
+import { clientes } from "../models/db-models/clientes";
 require('dotenv').config({ path: '.env' });
 
 

@@ -8,6 +8,9 @@ export class usuarios {
     @Column({length:10})
     cedula!: string
 
+    @Column({length:10})
+    password!: string
+
     @Column({length:45})
     Nombre!: string
 
