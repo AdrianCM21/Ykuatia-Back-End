@@ -1,36 +1,33 @@
-import { Entity, Column, PrimaryGeneratedColumn ,Index} from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn ,Index} from "typeorm"
 
 @Entity()
-@Index(['ruc'], { unique: true }) 
+@Index(['cedula'], { unique: true }) 
 export class clientes {
     @PrimaryGeneratedColumn()
     id!: number
 
+    @Column({length:45})
+    nombre!: string
+
     @Column({length:10})
-    ruc!: string
-
-    @Column({length:45})
-    razon_social!: string
-
-    @Column({length:45})
-    email!: string
-
-    @Column({length:45})
-    nombre_fantasia!: string
-
-    @Column({length:12})
-    telefono!: string
-
-    @Column({length:12})
-    celular!: string
+    cedula!: string
 
     @Column({length:45})
     direccion!: string
 
-    @Column({length:7})
-    departamento!: string
-    @Column({length:7})
-    ciudad!: string
-    @Column({length:7})
-    distrito!: string
+    @Column({length:45})
+    longitud!: string
+
+    @Column({length:45})
+    latitud!: string
+
+    @Column({length:12})
+    telefono!: string
+
+    @CreateDateColumn({ type: 'timestamp' })
+    fecha_creacion!: Date;
+
+    @Column({default:false})
+    delete!:boolean
+
 }
