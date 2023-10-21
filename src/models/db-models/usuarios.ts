@@ -17,8 +17,8 @@ export class usuarios {
     @Column({length:45})
     email!: string
 
-    @Column({length:45})
-    rol!: string
+    @Column('simple-array')
+    rol!: string[]
 
     @Column({length:12})
     telefono!: string
