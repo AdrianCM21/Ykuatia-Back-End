@@ -1,9 +1,9 @@
 import IAddUpdateCustomer from '../../interfaces/customer/AddUpdateCustomer';
 import ICustomer from '../../interfaces/customer/AddUpdateCustomer';
 import { AppDataSource } from '../../config/db.config';
-import { clientes } from '../../models/db-models/clientes';
-const RepositorioClientes = AppDataSource.getRepository(clientes)
-const getClientes = (desde:number): Promise<{resultado:clientes[],total:number}> => {
+import { Cliente } from '../../models/db-models/clientes';
+const RepositorioClientes = AppDataSource.getRepository(Cliente)
+const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> => {
     return new Promise(async (resolve, reject) => {
         try {
             const [result, resultCout] = await RepositorioClientes.findAndCount(
@@ -60,13 +60,11 @@ const getClientes = (desde:number): Promise<{resultado:clientes[],total:number}>
 
  const addCliente = async (data: IAddUpdateCustomer) => {
     return new Promise(async(resolve, reject) => {
-        const addCliente = new clientes()
+        const addCliente = new Cliente()
         try {
             addCliente.cedula=data.cedula
             addCliente.nombre=data.nombre
             addCliente.direccion=data.direccion
-            addCliente.latitud=data.latitud
-            addCliente.longitud=data.longitud
             addCliente.telefono=data.telefono
             const result = await AppDataSource.manager.save(addCliente)
             console.log(result)
@@ -86,8 +84,6 @@ const updateCliente = async (id: string, data: IAddUpdateCustomer) => {
             clienteUpdate.cedula=data.cedula
             clienteUpdate.nombre=data.nombre
             clienteUpdate.direccion=data.direccion
-            clienteUpdate.latitud=data.latitud
-            clienteUpdate.longitud=data.longitud
             clienteUpdate.telefono=data.telefono
             const result = await AppDataSource.manager.save(clienteUpdate)
             resolve(result)

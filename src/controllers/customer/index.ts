@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import IAddUpdateCustomer from '../../interfaces/customer/AddUpdateCustomer';
-import * as CustomerService from '../../services/customer';
+import * as CustomerService from '../../services/customer/customer.service';
 
 const getClientes = async (req: Request, res: Response) => {
     const { desde } = req.query
