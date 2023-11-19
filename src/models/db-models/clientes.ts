@@ -48,7 +48,7 @@ export class Cliente {
 
     @ManyToOne(() => TipoCliente, tipoCliente => tipoCliente.clientes)
     @JoinColumn({ name: 'id_tipo' })  // Esta es la columna de la clave foránea
-    tipoCliente: TipoCliente;
+    tipoCliente: number;
 
 
     @BeforeInsert()

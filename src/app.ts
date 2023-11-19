@@ -2,8 +2,6 @@ import express from "express";
 import helmet from "helmet";
 import dotenv from "dotenv"
 import cors from "cors"
-import expressJwt from 'express-jwt';
-import guard from 'express-jwt-permissions';
 dotenv.config();
 import routes from "./routes"
 

@@ -6,6 +6,7 @@ const getClientes = async (req: Request, res: Response) => {
     const { desde } = req.query
     try {
         const result = await CustomerService.getClientes(Number(desde))
+        console.log(result)
         res.json(result)
     } catch (error) {
         console.log(error)
@@ -13,31 +14,18 @@ const getClientes = async (req: Request, res: Response) => {
     }
 }
 
-// const getCustomer = async (req: Request, res: Response) => {
-//     const { id } = req.params
-//     console.log('llega controlers')
-//     try {
-//         const result = await CustomerService.getCustomer(id)
-//         res.json(result)
-//     } catch (error) {
-//         console.log(error)
-//         res.status(400).json(error)
-//     }
-// }
-// const getCustomerRuc = async (req: Request, res: Response) => {
-//     const { ruc } = req.params
-//     try {
-//         const result = await CustomerService.getCustomerRuc(ruc)
-//         res.json(result)
-//     } catch (error) {
-//         res.status(400).json(error)
-//     }
-// }
-
+const getCustomerTypes = async (req: Request, res: Response) => {
+    try {
+        const result = await CustomerService.getCustomerTypes()
+        res.json(result)
+    } catch (error) {
+        console.log(error)
+        res.status(400).json(error)
+    }
+}
 
 const addCliente = async (req: Request<{}, {}, IAddUpdateCustomer>, res: Response) => {
     const data = req.body
-    console.log(req.body)
 
     try {
         const result = await CustomerService.addCliente(data)
@@ -73,7 +61,6 @@ const deleteCliente = async (req: Request, res: Response) => {
     }
 }
 
-export { addCliente, getClientes, updateCliente, deleteCliente
-    //getCustomer, updateCustomer ,getCustomerRuc
+export { addCliente, getClientes, updateCliente, deleteCliente,getCustomerTypes
 }
 

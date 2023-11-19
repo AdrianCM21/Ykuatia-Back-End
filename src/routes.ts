@@ -11,10 +11,12 @@ const routes = (app: Express) => {
   app.post('/api/login', AuthController.login);
 
   // Clientes
-  app.post('/api/cliente', CreateCustomerRequest,ClienteController.addCliente);
   app.get('/api/cliente',  ClienteController.getClientes);
+  app.get('/api/clientetipo',  ClienteController.getCustomerTypes);
+  app.post('/api/cliente', CreateCustomerRequest,ClienteController.addCliente);
   app.put('/api/cliente/:id', CreateCustomerRequest,  ClienteController.updateCliente);
   app.delete('/api/cliente/:id',  ClienteController.deleteCliente);
+
 };
 
 export default routes;
