@@ -1,8 +1,8 @@
 
 import { AppDataSource } from '../../config/db.config';
-import { usuarios } from '../../models/db-models/usuarios';
+import { Usuario } from '../../models/db-models/usuarios';
 require('dotenv').config({ path: '.env' });
-const RepositorioUsuarios = AppDataSource.getRepository(usuarios);
+const RepositorioUsuarios = AppDataSource.getRepository(Usuario);
 const jwt = require('jsonwebtoken');
 
 const loginService = async (email: string, password: string): Promise<{ token: string | null, roles: string[] | null }> => {

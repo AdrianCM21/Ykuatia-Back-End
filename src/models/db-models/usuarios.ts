@@ -1,26 +1,36 @@
-import { Entity, Column, PrimaryGeneratedColumn ,Index} from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn ,Index, OneToMany, ManyToOne, JoinColumn} from "typeorm"
 
-@Entity()
-export class usuarios {
+@Entity('roles_usuarios')
+export class RolUsuario {
     @PrimaryGeneratedColumn()
-    id!: number
+    id_rol: number
+
+    @Column({length:40})
+    descripcion: string
+
+    @OneToMany(()=>Usuario,usuario=>usuario.rol)
+    usuarios:Usuario[]
+
+
+}
+
+@Entity('usuarios')
+export class Usuario {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column({length:40})
+    email: string
 
     @Column({length:10})
-    cedula!: string
+    password: string
 
-    @Column({length:10})
-    password!: string
+    @Column({length:40})
+    Nombre: string
 
-    @Column({length:45})
-    Nombre!: string
+    @ManyToOne(()=>RolUsuario,rol=>rol.usuarios)
+    @JoinColumn({name:'id_rol'})
+    rol:RolUsuario
 
-    @Column({length:45})
-    email!: string
-
-    @Column('simple-array')
-    rol!: string[]
-
-    @Column({length:12})
-    telefono!: string
 
 }

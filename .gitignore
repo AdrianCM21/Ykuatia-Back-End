@@ -1,11 +1,66 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Dependency directories
+pnp/
+.pnp/
+.pnp.js
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
 .env
-node_modules
-package-lock.json
-cert.p12
-src/storage/kude/*
-src/storage/xml/*
-src/storage/DTE/*
-*src/services/DE/*
-package-lock.json
+
+# macOS
 .DS_Store
-*.DS_Store
+
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+
+# Windows desktop.ini files
+Desktop.ini
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains WebStorm
+.idea/
+
+# Editor-specific files
+*~
+*.swp
+*.swo
+*.bak
+*.backup
+*.vscode/
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+.komodotools/
+.kate-swp/
+.idea/
+.project
+.buildpath
+.cproject
+.settings/
+.tmproj
+*.esproj
+*.orig
