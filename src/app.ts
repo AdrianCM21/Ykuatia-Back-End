@@ -4,10 +4,12 @@ import dotenv from "dotenv"
 import cors from "cors"
 dotenv.config();
 import routes from "./routes"
+import { facturasCron } from "./jobs/Facturas";
 
 
 const app = express();
 
+facturasCron.start()
 
 app.use(express.json());
 app.use(helmet())

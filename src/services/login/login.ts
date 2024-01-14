@@ -20,7 +20,7 @@ const loginService = async (email: string, password: string): Promise<string | n
     }
 
     const secret = process.env.MI_CLAVESECRETA;
-    const newJWT = jwt.sign({ id: user.id, nombre: user.Nombre }, secret);
+    const newJWT = jwt.sign({ id: user.id, nombre: user.Nombre }, secret, { expiresIn: '7d' });
 
     return newJWT
   } catch (error) {
