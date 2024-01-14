@@ -6,7 +6,6 @@ const getClientes = async (req: Request, res: Response) => {
     const { desde } = req.query
     try {
         const result = await CustomerService.getClientes(Number(desde))
-        console.log(result)
         res.json(result)
     } catch (error) {
         console.log(error)

@@ -3,6 +3,7 @@ import ICustomer from '../../interfaces/customer/AddUpdateCustomer';
 import { AppDataSource } from '../../config/db.config';
 import { Cliente ,TipoCliente} from '../../models/db-models/clientes';
 const RepositorioClientes = AppDataSource.getRepository(Cliente)
+const RepositorioTipoClientes = AppDataSource.getRepository(TipoCliente)
 const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -25,13 +26,18 @@ const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> 
 
  const addCliente = async (data: IAddUpdateCustomer) => {
     return new Promise(async(resolve, reject) => {
-        const addCliente = new Cliente()
         try {
+            const tipoCliente = await RepositorioTipoClientes.findOneBy({id_tipo:Number(data.tipoCliente)})
+            if(!tipoCliente){
+                reject('El tipo de cliente no existe')
+                return
+            }
+            const addCliente = new Cliente()
             addCliente.cedula=data.cedula
             addCliente.nombre=data.nombre
             addCliente.direccion=data.direccion
             addCliente.telefono=data.telefono
-            addCliente.tipoCliente=data.tipoCliente
+            addCliente.tipoCliente=tipoCliente
             const result = await AppDataSource.manager.save(addCliente)
             console.log(result)
             resolve(result)
@@ -46,12 +52,17 @@ const updateCliente = async (id: string, data: IAddUpdateCustomer) => {
     return new Promise(async(resolve, reject) => {
         try {
             const clienteUpdate = await RepositorioClientes.findOneBy({id:Number(id)})
+            const tipoCliente = await RepositorioTipoClientes.findOneBy({id_tipo:Number(data.tipoCliente)})
+            if(!tipoCliente){
+                reject('El tipo de cliente no existe')
+                return
+            }
             if(clienteUpdate){
                 clienteUpdate.cedula = data.cedula
                 clienteUpdate.nombre = data.nombre
                 clienteUpdate.direccion = data.direccion
                 clienteUpdate.telefono = data.telefono
-                clienteUpdate.tipoCliente = data.tipoCliente
+                clienteUpdate.tipoCliente = tipoCliente
                 const result = await AppDataSource.manager.save(clienteUpdate)
                 resolve(result)
             }else{
