@@ -29,7 +29,6 @@ const getFacturasController = async (req: Request, res: Response) => {
 const descargarFactura = async (req: Request, res: Response) => {
     try {
         const {id} = req.query;
-        console.log(id)
         let clientes
         if (!id) {
             clientes = await obtenerClientes();
@@ -38,15 +37,17 @@ const descargarFactura = async (req: Request, res: Response) => {
         }
         
         if (!clientes) {
-            res.status(400).json({ message: 'No hay clientes registrados' });
+            res.status(404).json({ message: 'No hay clientes registrados' });
             return;
         }
 
         const clientesConFacturas = filtrarClientesConFacturas(clientes);
         if (!clientesConFacturas.length) {
-            res.status(400).json({ message: 'No hay clientes con facturas' });
+            console.log('first')
+            res.status(404).json({ message: 'No hay clientes con facturas' });
             return;
         }
+        console.log('second')
 
         const clientesConFacturasPendientes = filtrarFacturasPendientes(clientesConFacturas);
     
