@@ -34,7 +34,7 @@ const generacionFacturaTarifaVariable = async (cliente:Cliente):Promise<void> =>
 
 }
 
-const controlClienteTarifaFija = async ():Promise<void> => {
+const controlCliente = async ():Promise<void> => {
   try {
     const clientes = await ClienteRepositorio.find({ relations: ["tipoCliente"] })
     for (const cliente of clientes) {
@@ -50,4 +50,4 @@ const controlClienteTarifaFija = async ():Promise<void> => {
     throw error
   }
 }
- export { controlClienteTarifaFija}
+ export { controlCliente}

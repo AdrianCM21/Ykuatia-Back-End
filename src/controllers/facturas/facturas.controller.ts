@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { controlClienteTarifaFija } from "../../services/facturas/facturaJob.service"
-import { filtrarClientesConFacturas, filtrarFacturasPendientes, getFacturas, obtenerCliente, obtenerClientes } from '../../services/facturas/factura.service';
+import { controlCliente} from "../../services/facturas/facturaJob.service"
+import { completadoConsumoService, filtrarClientesConFacturas, filtrarFacturasPendientes, getFacturas, obtenerCliente, obtenerClientes } from '../../services/facturas/factura.service';
 import { createInvoice } from '../../services/facturas/pdf.service';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
@@ -13,6 +13,29 @@ const controlFacturas = async () => {
     } catch (error) {
         throw error
     }
+}
+
+const completadoFacturaConsumo = async (req: Request, res: Response) => {
+    const { id} = req.params
+    const { consumo } = req.body
+    console.log(id,consumo,req.body)
+    try {
+        if (!id || !consumo) {
+            res.status(400).json({ message: 'Faltan datos' });
+            return;
+        }
+        const result = await completadoConsumoService(id, consumo);
+        if (!result) {
+            res.status(404).json({ message: 'No se encontro la factura' });
+            return;
+        }
+        res.json({ message: result });
+        
+    } catch (error) {
+        console.log(error)
+        res.status(400).json(error)
+    }
+
 }
 
 const getFacturasController = async (req: Request, res: Response) => {
@@ -43,11 +66,9 @@ const descargarFactura = async (req: Request, res: Response) => {
 
         const clientesConFacturas = filtrarClientesConFacturas(clientes);
         if (!clientesConFacturas.length) {
-            console.log('first')
             res.status(404).json({ message: 'No hay clientes con facturas' });
             return;
         }
-        console.log('second')
 
         const clientesConFacturasPendientes = filtrarFacturasPendientes(clientesConFacturas);
     
@@ -70,4 +91,4 @@ const descargarFactura = async (req: Request, res: Response) => {
         res.status(500).send({ message: 'Error al generar las facturas' });
     }
 }
-export { controlFacturas, getFacturasController, descargarFactura}
+export { controlFacturas, getFacturasController, descargarFactura, completadoFacturaConsumo}

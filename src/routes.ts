@@ -21,6 +21,7 @@ const routes = (app: Express) => {
   // Facturas
   app.get('/api/facturas',  FacturaController.getFacturasController);
   app.get('/api/facturas/descargar',  FacturaController.descargarFactura);
+  app.post('/api/facturas/:id',  FacturaController.completadoFacturaConsumo);
 
 };
 

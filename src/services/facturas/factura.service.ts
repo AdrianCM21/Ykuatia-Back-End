@@ -23,10 +23,35 @@ const getFacturas = (desde:number): Promise<{resultado:Factura[],total:number}> 
     })
 }
 
+const completadoConsumoService = async (id:string,consumo:string):Promise<Factura |null> => {
+    try{
+        const config = {
+            where:{
+                id:Number(id)
+            },
+            relations: ['cliente', 'cliente.tipoCliente'] 
+        }
+        
+        const factura = await RepositorioFacturas.findOne(config)
+        if(!factura){
+            return null
+        }
+        factura.estado = 'pendiente a pago'
+        factura.monto = Number(consumo) * factura.cliente.tipoCliente.tarifa
+        const result=await RepositorioFacturas.save(factura)
+        return result
+    
+
+    }catch (error){
+        throw error
+    }
+  
+}
+
 
 
 const filtrarClientesConFacturas = (clientes:Cliente[]) => {
-    return clientes.filter(cliente => cliente.factura && cliente.factura.length > 0 &&  cliente.factura.some(factura => factura.estado === 'pendiente')).map(cliente => {return{cliente,'facturas':cliente.factura}});
+    return clientes.filter(cliente => cliente.factura && cliente.factura.length > 0 &&  cliente.factura.some(factura => factura.estado === 'pendiente a pago')).map(cliente => {return{cliente,'facturas':cliente.factura}});
 };
 
 const filtrarFacturasPendientes = (clientesConFacturas:IDataPdf[]) => {
@@ -57,4 +82,4 @@ const obtenerCliente = async (id:string):Promise<Cliente[]|null> => {
     return [cliente]
 };
  
-export { getFacturas,obtenerClientes,filtrarClientesConFacturas,filtrarFacturasPendientes,obtenerCliente}
+export { getFacturas,obtenerClientes,filtrarClientesConFacturas,filtrarFacturasPendientes,obtenerCliente,completadoConsumoService}
