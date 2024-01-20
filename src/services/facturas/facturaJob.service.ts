@@ -24,11 +24,13 @@ const generacionFacturaTarifaFija = async (cliente:Cliente):Promise<void> => {
 
 const generacionFacturaTarifaVariable = async (cliente:Cliente):Promise<void> => {
   try {
+    const idAuditoria= await newAuditoria("factura")
     const factura = new Factura()
     factura.cliente=cliente
     factura.monto=0
     factura.estado="pendiente a carga de consumo"
     await FacturaRepositorio.save(factura)
+    await appendAuditoria(idAuditoria,`Se genero la factura a ${cliente.nombre}, mes ${formateoMes(factura.Fecha_emicion)} `)
   } catch (error) {
     console.error("Error al generar la factura:", error)
     throw error
