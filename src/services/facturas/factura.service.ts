@@ -7,9 +7,12 @@ const RepositorioFacturas = AppDataSource.getRepository(Factura)
 const getFacturas = (desde:number): Promise<{resultado:Factura[],total:number}> => {
     return new Promise(async (resolve, reject) => {
         try {
-            const [result, resultCout] = await RepositorioFacturas.findAndCount(
-                {where:{delete:false},skip:desde,take:30, relations: ['cliente']}
-            )
+            const config = {
+                where:{delete:false},
+                skip:desde,
+                take:30,
+                relations: ['cliente']}
+            const [result, resultCout] = await RepositorioFacturas.findAndCount(config)
             if (result) {
                 resolve({'resultado':result,'total':resultCout})
             }
@@ -20,6 +23,20 @@ const getFacturas = (desde:number): Promise<{resultado:Factura[],total:number}> 
     })
 }
 
+
+
+const filtrarClientesConFacturas = (clientes:Cliente[]) => {
+    return clientes.filter(cliente => cliente.factura && cliente.factura.length > 0 &&  cliente.factura.some(factura => factura.estado === 'pendiente')).map(cliente => {return{cliente,'facturas':cliente.factura}});
+};
+
+const filtrarFacturasPendientes = (clientesConFacturas:IDataPdf[]) => {
+    return clientesConFacturas.map(cliente => {
+        return {
+            cliente: cliente.cliente,
+            'facturas': cliente.facturas.filter(factura => factura.estado === 'pendiente')
+        };
+    });
+};
 const obtenerClientes = async ():Promise<Cliente[]|null> => {
     const cliente= await RepositorioClientes.find({ relations: ["tipoCliente","factura"] });
     if(!cliente){
@@ -38,19 +55,6 @@ const obtenerCliente = async (id:string):Promise<Cliente[]|null> => {
         return null
     }
     return [cliente]
-};
-
-const filtrarClientesConFacturas = (clientes:Cliente[]) => {
-    return clientes.filter(cliente => cliente.factura && cliente.factura.length > 0 &&  cliente.factura.some(factura => factura.estado === 'pendiente')).map(cliente => {return{cliente,'facturas':cliente.factura}});
-};
-
-const filtrarFacturasPendientes = (clientesConFacturas:IDataPdf[]) => {
-    return clientesConFacturas.map(cliente => {
-        return {
-            cliente: cliente.cliente,
-            'facturas': cliente.facturas.filter(factura => factura.estado === 'pendiente')
-        };
-    });
 };
  
 export { getFacturas,obtenerClientes,filtrarClientesConFacturas,filtrarFacturasPendientes,obtenerCliente}
