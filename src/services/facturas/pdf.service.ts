@@ -2,7 +2,7 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import { TDocumentDefinitions, Content, StyleDictionary } from 'pdfmake/interfaces';
 import { IDataPdf } from "../../interfaces/facturas/pdf";
-import { Factura } from "../../models/db-models/facturas";
+import { Factura } from "../../models/facturas";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 

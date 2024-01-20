@@ -1,7 +1,7 @@
 import { Express } from 'express';
 import CreateCustomerRequest from './requests/CreateCustomerRequest';
 import * as AuthController from './controllers/auth/loginController';
-import * as ClienteController from './controllers/customer/index';
+import * as ClienteController from './controllers/customer/customers.controller';
 import * as FacturaController from './controllers/facturas/facturas.controller';
 
 

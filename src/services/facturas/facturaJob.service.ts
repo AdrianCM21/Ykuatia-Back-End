@@ -1,17 +1,21 @@
 import { AppDataSource } from "../../config/db.config"
-import { Cliente } from "../../models/db-models/clientes"
-import { Factura } from "../../models/db-models/facturas"
+import { Cliente } from "../../models/clientes"
+import { Factura } from "../../models/facturas"
+import { formateoMes } from "../../utils/formateoFechas"
+import { appendAuditoria, newAuditoria } from "../auditoria/auditoria.service"
 
 const ClienteRepositorio = AppDataSource.getRepository(Cliente)
 const FacturaRepositorio = AppDataSource.getRepository(Factura)
 
 const generacionFacturaTarifaFija = async (cliente:Cliente):Promise<void> => {
   try {
+    const idAuditoria= await newAuditoria("factura")
     const factura = new Factura()
     factura.cliente=cliente
     factura.monto=cliente.tipoCliente.tarifa
     factura.estado="pendiente a pago"
     await FacturaRepositorio.save(factura)
+    await appendAuditoria(idAuditoria,`Se genero la factura a ${cliente.nombre}, mes ${formateoMes(factura.Fecha_emicion)} `)
   } catch (error) {
     console.error("Error al generar la factura:", error)
     throw error

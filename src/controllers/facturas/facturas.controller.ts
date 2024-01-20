@@ -9,7 +9,7 @@ import { unlinkSync } from 'fs';
 const controlFacturas = async () => {
     try {
         // await controlClienteTarifaFija();
-        console.log('se genero una factura')
+        // console.log('se genero una factura')
     } catch (error) {
         throw error
     }

@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn ,Index, BeforeInsert, OneToMany, ManyToOne, JoinColumn} from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn ,Index, BeforeInsert, OneToMany, ManyToOne, JoinColumn, OneToOne} from "typeorm"
 import { Factura } from "./facturas";
+import { Auditoria } from "./auditoria";
 
 @Entity('tipos_clientes')
 export class TipoCliente {
@@ -40,8 +41,12 @@ export class Cliente {
     @Column({default:false})
     delete:boolean
 
+    @OneToOne(()=>Auditoria,auditoria=>auditoria.id)
+    @JoinColumn({name:'id_auditoria'})
+    auditoria:Auditoria
+
     @ManyToOne(() => TipoCliente, tipoCliente => tipoCliente.clientes)
-    @JoinColumn({ name: 'id_tipo' })  // Esta es la columna de la clave foránea
+    @JoinColumn({ name: 'id_tipo' })  
     tipoCliente: TipoCliente;
 
     @OneToMany(() => Factura, factura => factura.cliente)

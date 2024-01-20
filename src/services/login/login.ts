@@ -1,6 +1,6 @@
 
 import { AppDataSource } from '../../config/db.config';
-import { Usuario } from '../../models/db-models/usuarios';
+import { Usuario } from '../../models/usuarios';
 require('dotenv').config({ path: '.env' });
 const RepositorioUsuarios = AppDataSource.getRepository(Usuario);
 const jwt = require('jsonwebtoken');

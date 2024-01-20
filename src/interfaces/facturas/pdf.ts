@@ -1,5 +1,5 @@
-import { Cliente } from "../../models/db-models/clientes";
-import { Factura } from "../../models/db-models/facturas";
+import { Cliente } from "../../models/clientes";
+import { Factura } from "../../models/facturas";
 
 export interface IDataPdf{
     cliente:Cliente

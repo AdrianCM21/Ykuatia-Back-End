@@ -1,8 +1,9 @@
 import { DataSource } from "typeorm"
-import { RolUsuario, Usuario } from "../models/db-models/usuarios"
-import { Cliente, TipoCliente } from "../models/db-models/clientes";
-import { Factura } from "../models/db-models/facturas";
-import { TipoIngreso, Transaccion } from "../models/db-models/trasacciones";
+import { RolUsuario, Usuario } from "../models/usuarios"
+import { Cliente, TipoCliente } from "../models/clientes";
+import { Factura } from "../models/facturas";
+import { TipoIngreso, Transaccion } from "../models/trasacciones";
+import { Auditoria } from "../models/auditoria";
 require('dotenv').config({ path: '.env' });
 
 
@@ -14,5 +15,5 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_DATABASE,
     synchronize: true,
     logging: false,
-    entities: [Usuario,Cliente,TipoCliente,RolUsuario,Factura,Transaccion,TipoIngreso],
+    entities: [Usuario,Cliente,TipoCliente,RolUsuario,Factura,Transaccion,TipoIngreso,Auditoria],
 })

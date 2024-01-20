@@ -1,22 +1,25 @@
 import IAddUpdateCustomer from '../../interfaces/customer/AddUpdateCustomer';
-import ICustomer from '../../interfaces/customer/AddUpdateCustomer';
+// import ICustomer from '../../interfaces/customer/AddUpdateCustomer'
 import { AppDataSource } from '../../config/db.config';
-import { Cliente ,TipoCliente} from '../../models/db-models/clientes';
+import { Cliente ,TipoCliente} from '../../models/clientes';
+import { Auditoria } from '../../models/auditoria';
 const RepositorioClientes = AppDataSource.getRepository(Cliente)
+const RepositorioAuditorias = AppDataSource.getRepository(Auditoria)
 const RepositorioTipoClientes = AppDataSource.getRepository(TipoCliente)
+
+
 const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> => {
     return new Promise(async (resolve, reject) => {
         try {
-            const [result, resultCout] = await RepositorioClientes.findAndCount(
-                {where:{delete:false},skip:desde,take:30, relations: ['tipoCliente']}
-            )
-            if (result.length) {
-                resolve({'resultado':result,'total':resultCout})
-            } else {
-                reject({
-                    success: 'error'
-                })
+
+            const config = {
+                where:{delete:false},
+                skip:desde,
+                take:30,
+                relations: ['tipoCliente','auditoria']
             }
+            const [result, resultCout] = await RepositorioClientes.findAndCount(config)
+            resolve({'resultado':result,'total':resultCout})
         } catch (error) {
             reject(error)
         }
@@ -24,22 +27,19 @@ const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> 
     })
 }
 
- const addCliente = async (data: IAddUpdateCustomer) => {
+ const addCliente = async (data: IAddUpdateCustomer,idAuditoria:number):Promise<Cliente> => {
     return new Promise(async(resolve, reject) => {
         try {
-            const tipoCliente = await RepositorioTipoClientes.findOneBy({id_tipo:Number(data.tipoCliente)})
-            if(!tipoCliente){
-                reject('El tipo de cliente no existe')
-                return
-            }
+            const tipoCliente = await findTipoCliente(data.tipoCliente);
+            const auditoria = await findAuditoria(idAuditoria);
             const addCliente = new Cliente()
             addCliente.cedula=data.cedula
             addCliente.nombre=data.nombre
             addCliente.direccion=data.direccion
             addCliente.telefono=data.telefono
+            addCliente.auditoria=auditoria
             addCliente.tipoCliente=tipoCliente
             const result = await AppDataSource.manager.save(addCliente)
-            console.log(result)
             resolve(result)
         } catch (error) {
             reject(error)
@@ -112,4 +112,20 @@ const getCustomerTypes = async () => {
     })
 
 }
+
+const findTipoCliente = async (id: number) => {
+    const tipoCliente = await RepositorioTipoClientes.findOneBy({id_tipo: id});
+    if (!tipoCliente) {
+        throw new Error('El tipo de cliente no existe');
+    }
+    return tipoCliente;
+};
+
+const findAuditoria = async (id: number) => {
+    const auditoria = await RepositorioAuditorias.findOneBy({id});
+    if (!auditoria) {
+        throw new Error('La auditoria no existe');
+    }
+    return auditoria;
+};
 export { addCliente,getClientes, updateCliente,deleteCliente,getCustomerTypes}

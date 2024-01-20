@@ -1,7 +1,7 @@
 import { AppDataSource } from '../../config/db.config';
 import { IDataPdf } from '../../interfaces/facturas/pdf';
-import { Cliente } from '../../models/db-models/clientes';
-import { Factura } from '../../models/db-models/facturas';
+import { Cliente } from '../../models/clientes';
+import { Factura } from '../../models/facturas';
 const RepositorioClientes = AppDataSource.getRepository(Cliente)
 const RepositorioFacturas = AppDataSource.getRepository(Factura)
 const getFacturas = (desde:number): Promise<{resultado:Factura[],total:number}> => {
