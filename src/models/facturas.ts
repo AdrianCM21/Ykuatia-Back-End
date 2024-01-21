@@ -13,6 +13,9 @@ export class Factura {
     @Column("decimal", { precision: 20, scale: 2 })
     monto: number
 
+    @Column("decimal", { precision: 20, scale: 2, default: 0 })
+    consumo: number
+
     @Column({default:false})
     delete:boolean
 

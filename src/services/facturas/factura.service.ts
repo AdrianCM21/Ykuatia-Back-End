@@ -39,6 +39,7 @@ const completadoConsumoService = async (id:string,consumo:string):Promise<Factur
             return null
         }
         factura.estado = 'pendiente a pago'
+        factura.consumo = Number(consumo)
         factura.monto = Number(consumo) * factura.cliente.tipoCliente.tarifa
         const result=await RepositorioFacturas.save(factura)
         return result
