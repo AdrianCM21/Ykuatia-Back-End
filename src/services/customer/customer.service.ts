@@ -38,8 +38,7 @@ const getClientesConFactura = (desde:number): Promise<{resultado:Cliente[],total
             }
             const result= await RepositorioClientes.find(config)
             const isFacturaPendiente = result.filter((element)=>{
-            {return element.factura.some((factura)=>{return factura.estado === 'pendiente a pago'})}
-        })
+            {return element.factura.some((factura)=>{return factura.estado === 'pendiente a pago'})}})
             const clientesConFacturas  = filtrarFacturasPendientes(isFacturaPendiente);
            
             resolve({'resultado':clientesConFacturas,'total':0})

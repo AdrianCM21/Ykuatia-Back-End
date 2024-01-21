@@ -2,6 +2,8 @@ import { AppDataSource } from '../../config/db.config';
 import { IDataPdf } from '../../interfaces/facturas/pdf';
 import { Cliente } from '../../models/clientes';
 import { Factura } from '../../models/facturas';
+import { formateoMes } from '../../utils/formateoFechas';
+import { appendAuditoria } from '../auditoria/auditoria.service';
 const RepositorioClientes = AppDataSource.getRepository(Cliente)
 const RepositorioFacturas = AppDataSource.getRepository(Factura)
 const getFacturas = (desde:number): Promise<{resultado:Factura[],total:number}> => {
@@ -63,7 +65,10 @@ const filtrarFacturasPendientes = (clientesConFacturas:IDataPdf[]) => {
     });
 };
 const obtenerClientes = async ():Promise<Cliente[]|null> => {
-    const cliente= await RepositorioClientes.find({ relations: ["tipoCliente","factura"] });
+    const cliente= await RepositorioClientes.find({
+        relations: ["tipoCliente","factura"],
+        where:{delete:false}
+     });
     if(!cliente){
         return null
     }
@@ -73,7 +78,7 @@ const obtenerClientes = async ():Promise<Cliente[]|null> => {
 const obtenerCliente = async (id:string):Promise<Cliente[]|null> => {
 
     const cliente = await RepositorioClientes.findOne({ 
-        where: { id: Number(id) },
+        where: { id: Number(id),delete:false },
         relations: ["tipoCliente", "factura"]
     });
     if(!cliente){
@@ -88,7 +93,9 @@ const pagoFactura = async (idFactura:number):Promise<Factura|null> => {
         const config = {
             where:{
                 id:idFactura
-            }
+            },
+            relations: ['cliente', 'cliente.auditoria']
+
         }
         
         const factura = await RepositorioFacturas.findOne(config)
@@ -97,6 +104,7 @@ const pagoFactura = async (idFactura:number):Promise<Factura|null> => {
         }
         factura.estado = 'pagado'
         const result=await RepositorioFacturas.save(factura)
+        await appendAuditoria(result.cliente.auditoria.id, `Se pago la factura mes de ${formateoMes(result.Fecha_emicion)}`)
         return result
     
 
