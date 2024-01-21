@@ -4,4 +4,5 @@ export default interface IAddUpdateCustomer {
     telefono: string
     direccion:string
     tipoCliente:number
+    locacion:string
 }

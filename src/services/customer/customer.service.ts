@@ -61,6 +61,7 @@ const getClientesConFactura = (desde:number): Promise<{resultado:Cliente[],total
             addCliente.telefono=data.telefono
             addCliente.auditoria=auditoria
             addCliente.tipoCliente=tipoCliente
+            addCliente.locacion=data.locacion
             const result = await AppDataSource.manager.save(addCliente)
             resolve(result)
         } catch (error) {
@@ -85,6 +86,7 @@ const updateCliente = async (id: string, data: IAddUpdateCustomer) => {
                 clienteUpdate.direccion = data.direccion
                 clienteUpdate.telefono = data.telefono
                 clienteUpdate.tipoCliente = tipoCliente
+                clienteUpdate.locacion = data.locacion
                 const result = await AppDataSource.manager.save(clienteUpdate)
                 resolve(result)
             }else{

@@ -3,7 +3,6 @@ import { loginService } from '../../services/login/login';
 
 
 const login = async (req: Request, res: Response) => {
-  console.log(req.body)
     const { email, password } = req.body;
   
     try {

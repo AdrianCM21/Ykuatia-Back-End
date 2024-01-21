@@ -20,7 +20,11 @@ const newAuditoria = async (tipo: string): Promise<number> => {
 const getAuditoriaId=(id:number):Promise<number>=>{
     return new Promise(async(resolve, reject) => {
         try {
-            const result = await RepositorioCliente.findOneBy({id})
+            const config = {
+                where:{id},
+                relations: ['auditoria']
+            }
+            const result = await RepositorioCliente.findOne(config)
             if (result) {
                 resolve(result.auditoria.id)
             }else{

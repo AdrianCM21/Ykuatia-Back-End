@@ -50,7 +50,6 @@ const addCliente = async (req: Request<{}, {}, IAddUpdateCustomer>, res: Respons
 const updateCliente = async (req: Request<{ id: string }, {}, IAddUpdateCustomer>, res: Response) => {
     const { id } = req.params
     const data = req.body
-
     try {
         const idAuditora= await getAuditoriaId(Number(id))
         const result = await CustomerService.updateCliente(id, data)
@@ -58,6 +57,7 @@ const updateCliente = async (req: Request<{ id: string }, {}, IAddUpdateCustomer
 
         res.json(result)
     } catch (error) {
+        console.log(error)
         res.status(400).json(error)
     }
 }

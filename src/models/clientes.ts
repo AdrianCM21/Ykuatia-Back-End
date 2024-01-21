@@ -35,6 +35,9 @@ export class Cliente {
     @Column({length:12})
     telefono: string
 
+    @Column()
+    locacion: string
+
     @CreateDateColumn({ type: 'timestamp' })
     fecha_creacion: Date;
 
