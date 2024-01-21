@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import { controlCliente} from "../../services/facturas/facturaJob.service"
-import { completadoConsumoService, filtrarClientesConFacturas, filtrarFacturasPendientes, getFacturas, obtenerCliente, obtenerClientes } from '../../services/facturas/factura.service';
+import { completadoConsumoService, filtrarClientesConFacturas, filtrarFacturasPendientes, getFacturas, obtenerCliente, obtenerClientes, pagoFactura } from '../../services/facturas/factura.service';
 import { createInvoice } from '../../services/facturas/pdf.service';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { unlinkSync } from 'fs';
+import { Factura } from '../../models/facturas';
 
 const controlFacturas = async () => {
     try {
-        // await controlClienteTarifaFija();
+        // await controlCliente();
         // console.log('se genero una factura')
     } catch (error) {
         throw error
@@ -18,7 +19,6 @@ const controlFacturas = async () => {
 const completadoFacturaConsumo = async (req: Request, res: Response) => {
     const { id} = req.params
     const { consumo } = req.body
-    console.log(id,consumo,req.body)
     try {
         if (!id || !consumo) {
             res.status(400).json({ message: 'Faltan datos' });
@@ -91,4 +91,21 @@ const descargarFactura = async (req: Request, res: Response) => {
         res.status(500).send({ message: 'Error al generar las facturas' });
     }
 }
-export { controlFacturas, getFacturasController, descargarFactura, completadoFacturaConsumo}
+
+const pagoFacturaController = async (req: Request, res: Response) => {
+    const {pagos:facturas} = req.body
+    try {
+        if (!facturas) {
+            res.status(400).json({ message: 'Faltan datos' });
+            return;
+        }
+        facturas.forEach(async (factura:{id:number}) => {
+            await pagoFactura(factura.id)
+        });
+        res.json({ message: 'Facturas pagadas' });
+    } catch (error) {
+        console.log(error)
+        res.status(400).json(error)
+    }
+}
+export { controlFacturas, getFacturasController, descargarFactura, completadoFacturaConsumo,pagoFacturaController}

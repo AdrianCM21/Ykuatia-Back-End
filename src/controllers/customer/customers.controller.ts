@@ -14,6 +14,17 @@ const getClientes = async (req: Request, res: Response) => {
     }
 }
 
+const getClientesConFactura = async (req: Request, res: Response) => {
+    const { desde } = req.query
+    try {
+        const result = await CustomerService.getClientesConFactura(Number(desde))
+        res.json(result)
+    } catch (error) {
+        console.log(error)
+        res.status(400).json(error)
+    }
+}
+
 const getCustomerTypes = async (req: Request, res: Response) => {
     try {
         const result = await CustomerService.getCustomerTypes()
@@ -63,6 +74,6 @@ const deleteCliente = async (req: Request, res: Response) => {
     }
 }
 
-export { addCliente, getClientes, updateCliente, deleteCliente,getCustomerTypes
+export { addCliente, getClientes, updateCliente, deleteCliente,getCustomerTypes,getClientesConFactura
 }
 

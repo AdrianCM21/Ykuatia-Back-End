@@ -16,12 +16,14 @@ const routes = (app: Express) => {
   app.get('/api/clientetipo',  ClienteController.getCustomerTypes);
   app.post('/api/cliente', CreateCustomerRequest,ClienteController.addCliente);
   app.put('/api/cliente/:id', CreateCustomerRequest,  ClienteController.updateCliente);
+  app.get('/api/clientefactura',  ClienteController.getClientesConFactura)
   app.delete('/api/cliente/:id',  ClienteController.deleteCliente);
 
   // Facturas
   app.get('/api/facturas',  FacturaController.getFacturasController);
   app.get('/api/facturas/descargar',  FacturaController.descargarFactura);
   app.post('/api/facturas/:id',  FacturaController.completadoFacturaConsumo);
+  app.post('/api/facturapagos',  FacturaController.pagoFacturaController);
 
 };
 

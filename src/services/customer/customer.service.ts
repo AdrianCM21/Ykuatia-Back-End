@@ -27,6 +27,29 @@ const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> 
     })
 }
 
+const getClientesConFactura = (desde:number): Promise<{resultado:Cliente[],total:number}> => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            const config = {
+                where:{delete:false},
+                skip:desde,
+                relations: ['factura']
+            }
+            const result= await RepositorioClientes.find(config)
+            const isFacturaPendiente = result.filter((element)=>{
+            {return element.factura.some((factura)=>{return factura.estado === 'pendiente a pago'})}
+        })
+            const clientesConFacturas  = filtrarFacturasPendientes(isFacturaPendiente);
+           
+            resolve({'resultado':clientesConFacturas,'total':0})
+        } catch (error) {
+            reject(error)
+        }
+        
+    })
+}
+
  const addCliente = async (data: IAddUpdateCustomer,idAuditoria:number):Promise<Cliente> => {
     return new Promise(async(resolve, reject) => {
         try {
@@ -79,16 +102,11 @@ const deleteCliente = async (id: string) => {
     return new Promise(async(resolve, reject) => {
         try {
             let clienteDelete = await RepositorioClientes.findBy({id:Number(id)})
-            if (clienteDelete.length) {
                 clienteDelete[0].delete=true
                 await AppDataSource.manager.save(clienteDelete)
 
                 resolve({"success":'Eliminado correctamente'})
-            } else {
-                reject({
-                    success: 'error'
-                })
-            }
+
         } catch (error) {
             reject(error)
         }
@@ -99,13 +117,7 @@ const getCustomerTypes = async () => {
     return new Promise(async(resolve, reject) => {
         try {
             const result = await AppDataSource.manager.find(TipoCliente)
-            if (result.length) {
                 resolve(result)
-            } else {
-                reject({
-                    success: 'error'
-                })
-            }
         } catch (error) {
             reject(error)
         }
@@ -128,4 +140,14 @@ const findAuditoria = async (id: number) => {
     }
     return auditoria;
 };
-export { addCliente,getClientes, updateCliente,deleteCliente,getCustomerTypes}
+
+const filtrarFacturasPendientes = (clientesConFacturas:Cliente[]):Cliente[] => {
+    const clientes = clientesConFacturas.map(cliente => {
+        return {
+            ...cliente,
+            'factura': cliente.factura.filter(factura => factura.estado === 'pendiente a pago')
+        };
+    });
+    return clientes as Cliente[];
+};
+export { getClientesConFactura,addCliente,getClientes, updateCliente,deleteCliente,getCustomerTypes}

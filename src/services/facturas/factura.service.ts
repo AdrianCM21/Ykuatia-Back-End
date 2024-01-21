@@ -58,7 +58,7 @@ const filtrarFacturasPendientes = (clientesConFacturas:IDataPdf[]) => {
     return clientesConFacturas.map(cliente => {
         return {
             cliente: cliente.cliente,
-            'facturas': cliente.facturas.filter(factura => factura.estado === 'pendiente')
+            'facturas': cliente.facturas.filter(factura => factura.estado === 'pendiente a pago')
         };
     });
 };
@@ -82,4 +82,27 @@ const obtenerCliente = async (id:string):Promise<Cliente[]|null> => {
     return [cliente]
 };
  
-export { getFacturas,obtenerClientes,filtrarClientesConFacturas,filtrarFacturasPendientes,obtenerCliente,completadoConsumoService}
+
+const pagoFactura = async (idFactura:number):Promise<Factura|null> => {
+    try{
+        const config = {
+            where:{
+                id:idFactura
+            }
+        }
+        
+        const factura = await RepositorioFacturas.findOne(config)
+        if(!factura){
+            return null
+        }
+        factura.estado = 'pagado'
+        const result=await RepositorioFacturas.save(factura)
+        return result
+    
+
+    }catch (error){
+        throw error
+    }
+
+}
+export { getFacturas,obtenerClientes,filtrarClientesConFacturas,filtrarFacturasPendientes,obtenerCliente,completadoConsumoService,pagoFactura}
