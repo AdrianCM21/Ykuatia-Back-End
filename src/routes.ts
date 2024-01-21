@@ -3,6 +3,7 @@ import CreateCustomerRequest from './requests/CreateCustomerRequest';
 import * as AuthController from './controllers/auth/loginController';
 import * as ClienteController from './controllers/customer/customers.controller';
 import * as FacturaController from './controllers/facturas/facturas.controller';
+import { addTransacionController, getTransacionesController } from './controllers/transacion/transacion.controlle';
 
 
 
@@ -24,6 +25,9 @@ const routes = (app: Express) => {
   app.get('/api/facturas/descargar',  FacturaController.descargarFactura);
   app.post('/api/facturas/:id',  FacturaController.completadoFacturaConsumo);
   app.post('/api/facturapagos',  FacturaController.pagoFacturaController);
+
+  app.get('/api/caja',  getTransacionesController);
+  app.post('/api/caja', addTransacionController);
 
 };
 

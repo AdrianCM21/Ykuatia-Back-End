@@ -16,7 +16,7 @@ const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> 
                 where:{delete:false},
                 skip:desde,
                 take:30,
-                relations: ['tipoCliente','auditoria']
+                relations: ['tipoCliente','auditoria','factura']
             }
             const [result, resultCout] = await RepositorioClientes.findAndCount(config)
             resolve({'resultado':result,'total':resultCout})
