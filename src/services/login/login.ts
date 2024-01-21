@@ -7,7 +7,11 @@ const jwt = require('jsonwebtoken');
 
 const loginService = async (email: string, password: string): Promise<string | null> => {
   try {
-    const user = await RepositorioUsuarios.findOneBy({ email: email });
+    const config ={ 
+      where:{ email},
+      relations:['rol']
+     }
+    const user = await RepositorioUsuarios.findOne(config);
 
     if (!user) {
       return null;
@@ -20,7 +24,7 @@ const loginService = async (email: string, password: string): Promise<string | n
     }
 
     const secret = process.env.MI_CLAVESECRETA;
-    const newJWT = jwt.sign({ id: user.id, nombre: user.Nombre }, secret, { expiresIn: '7d' });
+    const newJWT = jwt.sign({ id: user.id, nombre: user.Nombre ,rol:user.rol.descripcion }, secret);
 
     return newJWT
   } catch (error) {
