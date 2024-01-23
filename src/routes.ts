@@ -5,6 +5,7 @@ import * as ClienteController from './controllers/customer/customers.controller'
 import * as FacturaController from './controllers/facturas/facturas.controller';
 import { addTransacionController, getTransacionesController } from './controllers/transacion/transacion.controlle';
 import { getConfiguracionesController, updateConfiguracionesController } from './controllers/configuraciones/configuraciones.controller';
+import verifyWebToken from './middlewares/verifyWebToken';
 
 
 
@@ -12,6 +13,8 @@ const routes = (app: Express) => {
 
   // Usuarios
   app.post('/api/login', AuthController.login);
+
+  app.use(verifyWebToken)
 
   // Clientes
   app.get('/api/cliente',  ClienteController.getClientes);
