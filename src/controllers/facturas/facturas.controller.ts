@@ -9,7 +9,7 @@ import { Factura } from '../../models/facturas';
 
 const controlFacturas = async () => {
     try {
-        // await controlCliente();
+        await controlCliente();
         // console.log('se genero una factura')
     } catch (error) {
         throw error

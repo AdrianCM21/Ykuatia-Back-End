@@ -4,6 +4,7 @@ import { Cliente } from '../../models/clientes';
 import { Factura } from '../../models/facturas';
 import { formateoMes } from '../../utils/formateoFechas';
 import { appendAuditoria } from '../auditoria/auditoria.service';
+import { addTransaciones } from '../transaciones/transaciones.service';
 const RepositorioClientes = AppDataSource.getRepository(Cliente)
 const RepositorioFacturas = AppDataSource.getRepository(Factura)
 const getFacturas = (desde:number): Promise<{resultado:Factura[],total:number}> => {
@@ -106,6 +107,7 @@ const pagoFactura = async (idFactura:number):Promise<Factura|null> => {
         factura.estado = 'pagado'
         const result=await RepositorioFacturas.save(factura)
         await appendAuditoria(result.cliente.auditoria.id, `Se pago la factura mes de ${formateoMes(result.Fecha_emicion)}`)
+        await addTransaciones({monto:`${factura.monto}`,motivo:`Pago Factura. Usuario - ${factura.cliente.nombre}`,tipo_transacion:'2'})
         return result
     
 
