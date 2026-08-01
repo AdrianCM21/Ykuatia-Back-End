@@ -1,154 +1,181 @@
 import IAddUpdateCustomer from '../../interfaces/customer/AddUpdateCustomer';
-// import ICustomer from '../../interfaces/customer/AddUpdateCustomer'
 import { AppDataSource } from '../../config/db.config';
-import { Cliente ,TipoCliente} from '../../models/clientes';
+import { Cliente, TipoCliente } from '../../models/clientes';
 import { Auditoria } from '../../models/auditoria';
-const RepositorioClientes = AppDataSource.getRepository(Cliente)
-const RepositorioAuditorias = AppDataSource.getRepository(Auditoria)
-const RepositorioTipoClientes = AppDataSource.getRepository(TipoCliente)
+import { resolvePagination } from '../../utils/pagination';
+import { getJuntaId } from '../../utils/juntaContext';
+import { calcularRecargoMora, ESTADOS_COBRABLES, saldoFactura } from '../../utils/mora';
+import { getJuntaConfig } from '../junta/junta.service';
 
+const RepositorioClientes = AppDataSource.getRepository(Cliente);
+const RepositorioAuditorias = AppDataSource.getRepository(Auditoria);
+const RepositorioTipoClientes = AppDataSource.getRepository(TipoCliente);
 
-const getClientes = (desde:number): Promise<{resultado:Cliente[],total:number}> => {
-    return new Promise(async (resolve, reject) => {
-        try {
+type ListParams = {
+  page?: string | number;
+  limit?: string | number;
+  desde?: string | number;
+  q?: string;
+};
 
-            const config = {
-                where:{delete:false},
-                skip:desde,
-                take:30,
-                relations: ['tipoCliente','auditoria','factura']
-            }
-            const [result, resultCout] = await RepositorioClientes.findAndCount(config)
-            resolve({'resultado':result,'total':resultCout})
-        } catch (error) {
-            reject(error)
-        }
-        
-    })
-}
+const estadosCobrablesSql = ESTADOS_COBRABLES.map((e) => `'${e}'`).join(', ');
 
-const getClientesConFactura = (desde:number): Promise<{resultado:Cliente[],total:number}> => {
-    return new Promise(async (resolve, reject) => {
-        try {
+const getClientes = async (
+  params: ListParams
+): Promise<{ resultado: Cliente[]; total: number; page: number; limit: number }> => {
+  const juntaId = getJuntaId();
+  const { skip, limit, page } = resolvePagination(params);
+  const qb = RepositorioClientes.createQueryBuilder('c')
+    .leftJoinAndSelect('c.tipoCliente', 'tipoCliente')
+    .leftJoinAndSelect('c.auditoria', 'auditoria')
+    .leftJoinAndSelect('c.factura', 'factura')
+    .where('c.delete = :del', { del: false })
+    .andWhere('c.id_junta = :juntaId', { juntaId });
 
-            const config = {
-                where:{delete:false},
-                skip:desde,
-                relations: ['factura']
-            }
-            const result= await RepositorioClientes.find(config)
-            const isFacturaPendiente = result.filter((element)=>{
-            {return element.factura.some((factura)=>{return factura.estado === 'pendiente a pago'})}})
-            const clientesConFacturas  = filtrarFacturasPendientes(isFacturaPendiente);
-           
-            resolve({'resultado':clientesConFacturas,'total':0})
-        } catch (error) {
-            reject(error)
-        }
-        
-    })
-}
+  if (params.q) {
+    qb.andWhere('(c.nombre LIKE :q OR c.cedula LIKE :q OR c.telefono LIKE :q)', {
+      q: `%${params.q}%`,
+    });
+  }
 
- const addCliente = async (data: IAddUpdateCustomer,idAuditoria:number):Promise<Cliente> => {
-    return new Promise(async(resolve, reject) => {
-        try {
-            const tipoCliente = await findTipoCliente(data.tipoCliente);
-            const auditoria = await findAuditoria(idAuditoria);
-            const addCliente = new Cliente()
-            addCliente.cedula=data.cedula
-            addCliente.nombre=data.nombre
-            addCliente.direccion=data.direccion
-            addCliente.telefono=data.telefono
-            addCliente.auditoria=auditoria
-            addCliente.tipoCliente=tipoCliente
-            addCliente.locacion=data.locacion
-            const result = await AppDataSource.manager.save(addCliente)
-            resolve(result)
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
+  qb.orderBy('c.nombre', 'ASC').skip(skip).take(limit);
+  const [resultado, total] = await qb.getManyAndCount();
+  return { resultado, total, page, limit };
+};
+
+const getClientesConFactura = async (
+  params: ListParams
+): Promise<{ resultado: Cliente[]; total: number; page: number; limit: number }> => {
+  const juntaId = getJuntaId();
+  const { skip, limit, page } = resolvePagination(params);
+  const qb = RepositorioClientes.createQueryBuilder('c')
+    .leftJoinAndSelect(
+      'c.factura',
+      'factura',
+      `factura.estado IN (${estadosCobrablesSql}) AND factura.delete = false`
+    )
+    .leftJoinAndSelect('c.tipoCliente', 'tipoCliente')
+    .where('c.delete = :del', { del: false })
+    .andWhere('c.id_junta = :juntaId', { juntaId })
+    .andWhere(
+      `EXISTS (
+        SELECT 1 FROM facturas f
+        WHERE f.id_cliente = c.id
+          AND f.estado IN (${estadosCobrablesSql})
+          AND f.delete = false
+          AND f.id_junta = :juntaId
+      )`
+    );
+
+  if (params.q) {
+    qb.andWhere('(c.nombre LIKE :q OR c.cedula LIKE :q)', { q: `%${params.q}%` });
+  }
+
+  qb.orderBy('c.nombre', 'ASC').skip(skip).take(limit);
+  const [resultado, total] = await qb.getManyAndCount();
+  const junta = await getJuntaConfig();
+  const moraPct = Number(junta.mora_pct || 0);
+
+  for (const cliente of resultado) {
+    for (const factura of cliente.factura || []) {
+      const saldo = saldoFactura(Number(factura.monto), Number(factura.monto_pagado || 0));
+      const recargo = calcularRecargoMora({
+        saldo,
+        fechaVencimiento: factura.fecha_vencimiento,
+        moraPct,
+      });
+      Object.assign(factura, { saldo, recargo });
+    }
+  }
+
+  return { resultado, total, page, limit };
+};
+
+const addCliente = async (data: IAddUpdateCustomer, idAuditoria: number): Promise<Cliente> => {
+  const juntaId = getJuntaId();
+  const tipoCliente = await findTipoCliente(data.tipoCliente);
+  const auditoria = await findAuditoria(idAuditoria);
+  const addClienteEntity = new Cliente();
+  addClienteEntity.cedula = data.cedula;
+  addClienteEntity.nombre = data.nombre;
+  addClienteEntity.direccion = data.direccion;
+  addClienteEntity.telefono = data.telefono;
+  addClienteEntity.auditoria = auditoria;
+  addClienteEntity.tipoCliente = tipoCliente;
+  addClienteEntity.locacion = data.locacion;
+  addClienteEntity.nro_medidor = data.nro_medidor?.trim() || null;
+  addClienteEntity.id_junta = juntaId;
+  return AppDataSource.manager.save(addClienteEntity);
+};
 
 const updateCliente = async (id: string, data: IAddUpdateCustomer) => {
-
-    return new Promise(async(resolve, reject) => {
-        try {
-            const clienteUpdate = await RepositorioClientes.findOneBy({id:Number(id)})
-            const tipoCliente = await RepositorioTipoClientes.findOneBy({id_tipo:Number(data.tipoCliente)})
-            if(!tipoCliente){
-                reject('El tipo de cliente no existe')
-                return
-            }
-            if(clienteUpdate){
-                clienteUpdate.cedula = data.cedula
-                clienteUpdate.nombre = data.nombre
-                clienteUpdate.direccion = data.direccion
-                clienteUpdate.telefono = data.telefono
-                clienteUpdate.tipoCliente = tipoCliente
-                clienteUpdate.locacion = data.locacion
-                const result = await AppDataSource.manager.save(clienteUpdate)
-                resolve(result)
-            }else{
-                reject()
-            }
-            
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
+  const juntaId = getJuntaId();
+  const clienteUpdate = await RepositorioClientes.findOne({
+    where: { id: Number(id), id_junta: juntaId },
+  });
+  const tipoCliente = await RepositorioTipoClientes.findOne({
+    where: { id_tipo: Number(data.tipoCliente), id_junta: juntaId },
+  });
+  if (!tipoCliente) {
+    throw new Error('El tipo de cliente no existe');
+  }
+  if (!clienteUpdate) {
+    throw new Error('Cliente no encontrado');
+  }
+  clienteUpdate.cedula = data.cedula;
+  clienteUpdate.nombre = data.nombre;
+  clienteUpdate.direccion = data.direccion;
+  clienteUpdate.telefono = data.telefono;
+  clienteUpdate.tipoCliente = tipoCliente;
+  clienteUpdate.locacion = data.locacion;
+  if (data.nro_medidor !== undefined) {
+    clienteUpdate.nro_medidor = data.nro_medidor?.trim() || null;
+  }
+  return AppDataSource.manager.save(clienteUpdate);
+};
 
 const deleteCliente = async (id: string) => {
-    return new Promise(async(resolve, reject) => {
-        try {
-            let clienteDelete = await RepositorioClientes.findBy({id:Number(id)})
-                clienteDelete[0].delete=true
-                await AppDataSource.manager.save(clienteDelete)
-
-                resolve({"success":'Eliminado correctamente'})
-
-        } catch (error) {
-            reject(error)
-        }
-    })
-}
+  const juntaId = getJuntaId();
+  const clienteDelete = await RepositorioClientes.findOne({
+    where: { id: Number(id), id_junta: juntaId },
+  });
+  if (!clienteDelete) {
+    throw new Error('Cliente no encontrado');
+  }
+  clienteDelete.delete = true;
+  await AppDataSource.manager.save(clienteDelete);
+  return { success: 'Eliminado correctamente' };
+};
 
 const getCustomerTypes = async () => {
-    return new Promise(async(resolve, reject) => {
-        try {
-            const result = await AppDataSource.manager.find(TipoCliente)
-                resolve(result)
-        } catch (error) {
-            reject(error)
-        }
-    })
-
-}
+  const juntaId = getJuntaId();
+  return RepositorioTipoClientes.find({ where: { id_junta: juntaId } });
+};
 
 const findTipoCliente = async (id: number) => {
-    const tipoCliente = await RepositorioTipoClientes.findOneBy({id_tipo: id});
-    if (!tipoCliente) {
-        throw new Error('El tipo de cliente no existe');
-    }
-    return tipoCliente;
+  const juntaId = getJuntaId();
+  const tipoCliente = await RepositorioTipoClientes.findOne({
+    where: { id_tipo: id, id_junta: juntaId },
+  });
+  if (!tipoCliente) {
+    throw new Error('El tipo de cliente no existe');
+  }
+  return tipoCliente;
 };
 
 const findAuditoria = async (id: number) => {
-    const auditoria = await RepositorioAuditorias.findOneBy({id});
-    if (!auditoria) {
-        throw new Error('La auditoria no existe');
-    }
-    return auditoria;
+  const auditoria = await RepositorioAuditorias.findOneBy({ id });
+  if (!auditoria) {
+    throw new Error('La auditoria no existe');
+  }
+  return auditoria;
 };
 
-const filtrarFacturasPendientes = (clientesConFacturas:Cliente[]):Cliente[] => {
-    const clientes = clientesConFacturas.map(cliente => {
-        return {
-            ...cliente,
-            'factura': cliente.factura.filter(factura => factura.estado === 'pendiente a pago')
-        };
-    });
-    return clientes as Cliente[];
+export {
+  getClientesConFactura,
+  addCliente,
+  getClientes,
+  updateCliente,
+  deleteCliente,
+  getCustomerTypes,
 };
-export { getClientesConFactura,addCliente,getClientes, updateCliente,deleteCliente,getCustomerTypes}

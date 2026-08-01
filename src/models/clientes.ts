@@ -1,65 +1,82 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn ,Index, BeforeInsert, OneToMany, ManyToOne, JoinColumn, OneToOne} from "typeorm"
-import { Factura } from "./facturas";
-import { Auditoria } from "./auditoria";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Index,
+  BeforeInsert,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
+  OneToOne,
+} from 'typeorm';
+import { Factura } from './facturas';
+import { Auditoria } from './auditoria';
 
 @Entity('tipos_clientes')
 export class TipoCliente {
-    @PrimaryGeneratedColumn()
-    id_tipo: number
+  @PrimaryGeneratedColumn()
+  id_tipo: number;
 
-    @Column({length:45})
-    descripcion: string
+  @Column({ length: 45 })
+  descripcion: string;
 
-    @Column()
-    tarifa: number
+  @Column()
+  tarifa: number;
 
-    @OneToMany(() => Cliente, cliente => cliente.tipoCliente)
-    clientes: Cliente[];
+  @Column({ type: 'int', default: 1 })
+  id_junta: number;
+
+  @OneToMany(() => Cliente, (cliente) => cliente.tipoCliente)
+  clientes: Cliente[];
 }
 
 @Entity('clientes')
-@Index(['cedula'], { unique: true }) 
+@Index(['id_junta', 'cedula'], { unique: true })
 export class Cliente {
-    @PrimaryGeneratedColumn()
-    id: number
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({length:45})
-    nombre: string
+  @Column({ length: 45 })
+  nombre: string;
 
-    @Column({length:10})
-    cedula: string
+  @Column({ length: 10 })
+  cedula: string;
 
-    @Column({length:45})
-    direccion: string
+  @Column({ length: 45 })
+  direccion: string;
 
-    @Column({length:12})
-    telefono: string
+  @Column({ length: 12 })
+  telefono: string;
 
-    @Column()
-    locacion: string
+  @Column()
+  locacion: string;
 
-    @CreateDateColumn({ type: 'timestamp' })
-    fecha_creacion: Date;
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  nro_medidor: string | null;
 
-    @Column({default:false})
-    delete:boolean
+  @CreateDateColumn({ type: 'timestamp' })
+  fecha_creacion: Date;
 
-    @OneToOne(()=>Auditoria,auditoria=>auditoria.id)
-    @JoinColumn({name:'id_auditoria'})
-    auditoria:Auditoria
+  @Column({ default: false })
+  delete: boolean;
 
-    @ManyToOne(() => TipoCliente, tipoCliente => tipoCliente.clientes)
-    @JoinColumn({ name: 'id_tipo' })  
-    tipoCliente: TipoCliente;
+  @Column({ type: 'int', default: 1 })
+  id_junta: number;
 
-    @OneToMany(() => Factura, factura => factura.cliente)
-    factura: Factura[];
+  @OneToOne(() => Auditoria, (auditoria) => auditoria.id)
+  @JoinColumn({ name: 'id_auditoria' })
+  auditoria: Auditoria;
 
+  @ManyToOne(() => TipoCliente, (tipoCliente) => tipoCliente.clientes)
+  @JoinColumn({ name: 'id_tipo' })
+  tipoCliente: TipoCliente;
 
-    @BeforeInsert()
-    setFechaCreacion() {
-        this.fecha_creacion = new Date();
-    }
+  @OneToMany(() => Factura, (factura) => factura.cliente)
+  factura: Factura[];
 
+  @BeforeInsert()
+  setFechaCreacion() {
+    this.fecha_creacion = new Date();
+  }
 }
-

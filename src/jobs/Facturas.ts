@@ -1,4 +1,7 @@
-import { schedule } from "node-cron";
-import { controlFacturas } from "../controllers/facturas/facturas.controller";
+import { schedule } from 'node-cron';
+import { controlFacturas } from '../controllers/facturas/facturas.controller';
 
-export const facturasCron = schedule("*/30 * * * * *", controlFacturas);
+// Día 1 de cada mes a las 00:00 (America/Asuncion)
+export const facturasCron = schedule('0 0 1 * *', controlFacturas, {
+  timezone: 'America/Asuncion',
+});

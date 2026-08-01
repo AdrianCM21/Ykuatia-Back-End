@@ -26,6 +26,16 @@ pnp/
 # dotenv environment variables file
 .env
 
+# Uploaded junta logos
+uploads/
+
+# Database backups
+backups/
+logs/
+
+# Test coverage
+coverage/
+
 # macOS
 .DS_Store
 

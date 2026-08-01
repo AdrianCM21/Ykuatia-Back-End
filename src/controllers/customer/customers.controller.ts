@@ -4,76 +4,127 @@ import * as CustomerService from '../../services/customer/customer.service';
 import { appendAuditoria, getAuditoriaId, newAuditoria } from '../../services/auditoria/auditoria.service';
 
 const getClientes = async (req: Request, res: Response) => {
-    const { desde } = req.query
-    try {
-        const result = await CustomerService.getClientes(Number(desde))
-        res.json(result)
-    } catch (error) {
-        console.log(error)
-        res.status(400).json(error)
-    }
-}
+  try {
+    const result = await CustomerService.getClientes({
+      page: req.query.page as string,
+      limit: req.query.limit as string,
+      desde: req.query.desde as string,
+      q: req.query.q as string,
+    });
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'Error al listar clientes',
+    });
+  }
+};
 
 const getClientesConFactura = async (req: Request, res: Response) => {
-    const { desde } = req.query
-    try {
-        const result = await CustomerService.getClientesConFactura(Number(desde))
-        res.json(result)
-    } catch (error) {
-        console.log(error)
-        res.status(400).json(error)
-    }
-}
+  try {
+    const result = await CustomerService.getClientesConFactura({
+      page: req.query.page as string,
+      limit: req.query.limit as string,
+      desde: req.query.desde as string,
+      q: req.query.q as string,
+    });
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'Error al listar clientes con factura',
+    });
+  }
+};
 
-const getCustomerTypes = async (req: Request, res: Response) => {
-    try {
-        const result = await CustomerService.getCustomerTypes()
-        res.json(result)
-    } catch (error) {
-        console.log(error)
-        res.status(400).json(error)
-    }
-}
+const getCustomerTypes = async (_req: Request, res: Response) => {
+  try {
+    const result = await CustomerService.getCustomerTypes();
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'Error al listar tipos',
+    });
+  }
+};
 
 const addCliente = async (req: Request<{}, {}, IAddUpdateCustomer>, res: Response) => {
-    const data = req.body
-    try {
-        const idAuditora= await newAuditoria('cliente')
-        const result = await CustomerService.addCliente(data,idAuditora)
-        await appendAuditoria(idAuditora,`Se creo el cliente ${result.nombre} con cedula ${result.cedula}`)
-        res.json(result)
-    } catch (error) {
-        res.status(400).json(error)
-    }
-}
+  const data = req.body;
+  try {
+    const idAuditora = await newAuditoria('cliente');
+    const result = await CustomerService.addCliente(data, idAuditora);
+    await appendAuditoria(
+      idAuditora,
+      `Se creo el cliente ${result.nombre} con cedula ${result.cedula}`
+    );
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'Error al crear cliente',
+    });
+  }
+};
 
-const updateCliente = async (req: Request<{ id: string }, {}, IAddUpdateCustomer>, res: Response) => {
-    const { id } = req.params
-    const data = req.body
-    try {
-        const idAuditora= await getAuditoriaId(Number(id))
-        const result = await CustomerService.updateCliente(id, data)
-        if(idAuditora) await appendAuditoria(idAuditora,`Se actualizo el cliente ${data.nombre} con cedula ${data.cedula} `)
-
-        res.json(result)
-    } catch (error) {
-        console.log(error)
-        res.status(400).json(error)
+const updateCliente = async (
+  req: Request<{ id: string }, {}, IAddUpdateCustomer>,
+  res: Response
+) => {
+  const { id } = req.params;
+  const data = req.body;
+  try {
+    const idAuditora = await getAuditoriaId(Number(id));
+    const result = await CustomerService.updateCliente(id, data);
+    if (idAuditora) {
+      await appendAuditoria(
+        idAuditora,
+        `Se actualizo el cliente ${data.nombre} con cedula ${data.cedula} `
+      );
     }
-}
+    res.json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'Error al actualizar cliente',
+    });
+  }
+};
 
 const deleteCliente = async (req: Request, res: Response) => {
-    const { id } = req.params
-    try {
-        const idAuditora= await getAuditoriaId(Number(id))
-        const result = await CustomerService.deleteCliente(id)
-        if(idAuditora) await appendAuditoria(idAuditora,`Se elimino el cliente con id ${id} `)
-        res.json(result)
-    } catch (error) {
-        res.status(400).json(error)
-    }
-}
+  const { id } = req.params;
+  try {
+    const idAuditora = await getAuditoriaId(Number(id));
+    const result = await CustomerService.deleteCliente(id);
+    if (idAuditora) await appendAuditoria(idAuditora, `Se elimino el cliente con id ${id} `);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'Error al eliminar cliente',
+    });
+  }
+};
 
-export { addCliente, getClientes, updateCliente, deleteCliente,getCustomerTypes,getClientesConFactura
-}
+const getLecturasCliente = async (req: Request, res: Response) => {
+  try {
+    const { getLecturasByCliente } = await import('../../services/lecturas/lecturas.service');
+    const result = await getLecturasByCliente(Number(req.params.id), {
+      page: req.query.page as string,
+      limit: req.query.limit as string,
+    });
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'Error al listar lecturas',
+    });
+  }
+};
 
+export {
+  addCliente,
+  getClientes,
+  updateCliente,
+  deleteCliente,
+  getCustomerTypes,
+  getClientesConFactura,
+  getLecturasCliente,
+};

@@ -22,7 +22,7 @@ export class Usuario {
     @Column({length:40})
     email: string
 
-    @Column({length:10})
+    @Column({length:100})
     password: string
 
     @Column({length:40})
@@ -32,5 +32,6 @@ export class Usuario {
     @JoinColumn({name:'id_rol'})
     rol:RolUsuario
 
-
+    @Column({ type: 'int', default: 1 })
+    id_junta: number
 }

@@ -5,4 +5,5 @@ export default interface IAddUpdateCustomer {
     direccion:string
     tipoCliente:number
     locacion:string
+    nro_medidor?: string | null
 }

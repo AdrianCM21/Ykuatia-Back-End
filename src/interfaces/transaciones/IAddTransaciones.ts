@@ -1,5 +1,6 @@
 export default interface IAddTransacion {
-    motivo:string
-    monto:string
-    tipo_transacion:string
+  monto: string;
+  motivo: string;
+  tipo_transacion: string;
+  id_factura?: number;
 }
