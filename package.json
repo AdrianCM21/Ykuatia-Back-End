@@ -5,6 +5,8 @@
   "main": "src/server.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc --outDir dist",
+    "start": "node dist/server.js",
     "test": "jest --coverage --runInBand",
     "test:watch": "jest --watch",
     "typeorm": "typeorm-ts-node-commonjs -d src/config/db.config.ts",
